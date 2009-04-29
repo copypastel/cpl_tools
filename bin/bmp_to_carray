@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+require '~/Documents/copypastel/cpl_tools/lib/cpl_tools'
+
+options = {}
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: [file_name]"
+  
+  opts.separator ""
+end
+
+parser.parse! ARGV
+
+class App
+  attr_reader :args,:options
+  def initialize(args,options)
+    @args = args
+    @options = :options
+  end
+end
+
+module Runner
+  def run
+    bmp = CPL::Tools::Alchemy::BMP.load_file(args[0])
+    bmp.to_YCbCr.to_CArray
+  end
+end
+
+app = App.new(ARGV, options)
+app.extend Runner
+app.run
