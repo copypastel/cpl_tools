@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require '~/Documents/copypastel/cpl_tools/lib/cpl_tools'
+require 'optparse'
 
 options = {}
 parser = OptionParser.new do |opts|
@@ -22,7 +23,7 @@ end
 module Runner
   def run
     bmp = CPL::Tools::Alchemy::BMP.load_file(args[0])
-    bmp.to_YCbCr.to_CArray
+    #bmp.to_YCbCr.to_CArray
   end
 end
 
