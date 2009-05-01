@@ -6,6 +6,8 @@ module CPL::Tools::Alchemy
   end
     
   module BMP
+    include CPL::Tools::IOParser::BMP
+    
     class InvaladFileFormat < RuntimeError; end
     
     def self.load_file(file)
@@ -75,7 +77,7 @@ module CPL::Tools::Alchemy
       
       class DIB_Header
         DIB_START      = 0xE
-        DIB_SIZE_TYPE  = DWORD
+        #DIB_SIZE_TYPE  = DWORD
         
         attr_reader :raw, :dib_size
         def initialize(data,bmp_header)

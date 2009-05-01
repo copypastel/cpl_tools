@@ -22,7 +22,8 @@ end
 
 module Runner
   def run
-    bmp = CPL::Tools::Alchemy::BMP.load_file(args[0])
+#    bmp = CPL::Tools::Alchemy::BMP.load_file(args[0])
+    bmp = BMP_Image.new(args[0])
     #bmp.to_YCbCr.to_CArray
   end
 end
