@@ -1,17 +1,63 @@
 module CPL::Tools::IOParser; end
 class CPL::Tools::IOParser::Base
+  DATATYPES = {
+    :uint => {
+      :size => 3,
+      :convert => 3
+    },
+    :int => {
+      :size => 3,
+      :convert => 3
+    },
+    :string => {
+      :size => 3,
+      :convert =>
+    }
+  }
 
   def parse(ioObj)
+    self.class.datatypes.each do |datatype|
+      value = parse_datatype(datatype,ioObj)
+      value = datatype.block.call(value) unless datatype.block.nil?
+      self.instance_variable_set(datatype.prop,value)
+    end
+  end
+  
+  def parse_datatype(datatype,ioObj)
+    value = ioObj.read(DATATYPES[datatype.type].size(datatype))
+    value.reverse! if(datatype.endianess == :little_endian)
+    value = DATATYPES[datatype.type].convert(ioObj)
+    value = ioObj.read(type_size(datatype))
+    value = case datatype.type
+    when :uint:   ioObj.read(4)
+    when :int:    ioObj.read(4)
+    when :string: ioObj.read(datatype.options[:string_size])
+    end
+    value.reverse! if(datatype.endianess == :little_endian)
+    value = case datatype.type
+    when :uint
+    when :int
+    when :string
+    end
+    value
+  end
+  
+  def type_size(datatype)
+    when :uint:   ioObj.read(4)
+    when :int:    ioObj.read(4)
+    when :string: datatype.options[:string_size]
+    end
+  end
+  
+  def parse_with_symbol(datatype,ioObj)
   end
   
   def self.data prop, type, options = {}, &block
     endianess = options[:endianess] || self.default_endianess
-    # Eval this in the inheriting class
+    self.datatypes.push(DataDescription.new(prop,type,endianess,options,block))
+    # Add property definition in evaluating class
     self.subclass.class_eval do
-      self.properties.push(DataDescription.new(prop,type,endianess,options,block))
-      self.prop_map[prop] = (self.properties.size-1)
-      puts("#{prop}")
-      eval("def #{prop};self.properties[self.prop_map[#{prop}]].val;end")
+      eval("def #{prop};@#{prop};end")
     end
   end
   
@@ -23,14 +69,9 @@ class CPL::Tools::IOParser::Base
         @@default_endianess
       end
       
-      @@properties = []
-      def self.properties
-        @@properties
-      end
-      
-      @@prop_map = {}
-      def self.prop_map
-        @@prop_map
+      @@datatypes = []
+      def self.datatypes
+        @@datatypes
       end
       
       @@subclass = subclass

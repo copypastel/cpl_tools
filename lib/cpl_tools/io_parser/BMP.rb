@@ -1,7 +1,7 @@
 module CPL::Tools::IOParser::BMP
   class BMP_Header < CPL::Tools::IOParser::Base
-    #default_endianess :little_endian
-    data :flipfart, 2    , :endianess => :big_endian do |dat|
+    default_endianess :little_endian
+    data :format, :string , :endianess => :big_endian, :string_size => 2 do |dat|
         case [dat[0],dat[1]]
         when [ 0x42 , 0x4D ]: :STANDARD
         when [ 0x42 , 0x41 ]: :OS2_Bitmap_Array

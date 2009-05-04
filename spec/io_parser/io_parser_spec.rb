@@ -18,7 +18,7 @@ describe CPL::Tools::IOParser do
       end
     
       it "should parse the magic number" do
-        @parser.flipfart.should be(:STANDARD)
+        @parser.format.should eql(:STANDARD)
       end
     end
   end
