@@ -20,11 +20,11 @@ Alchemy is simple file type conversion, but in more complex types of files.  Rig
 
 ### IO_Parser ###
 
-IO_Parser takes an IO object (anything that has read, and pos=) and parses it into data structures for easy access.  You can think of it like a struct in C where the struct is defined and then because of how C addressing works, the struct can be overlaid a character buffer and you have immediate pointers to the data.  An example of a BMP_header is as follows:
+IO_Parser takes an IO object (anything that has read, and pos=) and parses it into data structures for easy access.  You can think of it like a struct in C where the struct is defined and then overlaid on a character buffere.  An example of a BMP_header follows:
 
     class BMP_Header < CPL::Tools::IOParser::Base
       #default_endianess :little_endian
-      data :format, 2    , :endianess => :big_endian do |dat|
+      data :format, :string , :endianess => :big_endian, :size => 2 do |dat|
           case [dat[0],dat[1]]
           when [ 0x42 , 0x4D ]: :STANDARD
           when [ 0x42 , 0x41 ]: :OS2_Bitmap_Array
@@ -40,7 +40,7 @@ IO_Parser takes an IO object (anything that has read, and pos=) and parses it in
       data :data_offset,  :uint
     end
 
-As you read the code you will see something that looks almost like a struct definition where based on the size of the type field (2nd paramater) the data is able to fit properly into the structure without any file parsing.  To use this the code would look like:
+As you read the code you will see something that looks almost like a struct definition where based on the size of the type field (2nd paramater) the data is able to fit properly into the structure without any file parsing.  To use this this code:
     
     header = BMP_Header.new.parse(File.open("file.bmp"))
 

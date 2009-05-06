@@ -63,7 +63,7 @@ module CPL::Tools::IOParser::BMP
       
       @raw = file.read
     end
-    
+        
     def self.load_file(file)
       BMP_Image.new(file)
     end
