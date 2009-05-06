@@ -23,7 +23,7 @@ module CPL::Tools::IOParser::BMP
     VALID_BIT_DEPTHS = [1,4,8,16,24,32]
     default_endianess :little_endian
 
-    data(:size, :uint) {|size| raise "Not the proper DIB_Header" unless size == WV3_SIZE}
+    data(:size, :uint) {|size| raise "what.."}#raise "Not the proper DIB_Header" unless size == WV3_SIZE}
     data :width, :int
     data :height, :int
     data :color_plane_number, 2
