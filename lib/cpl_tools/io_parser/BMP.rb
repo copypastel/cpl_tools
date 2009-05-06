@@ -1,7 +1,7 @@
 module CPL::Tools::IOParser::BMP
   class BMP_Header < CPL::Tools::IOParser::Base
     default_endianess :little_endian
-    data :format, :string , :endianess => :big_endian, :string_size => 2 do |dat|
+    data :format, :string , :endianess => :big_endian, :size => 2 do |dat|
         case [dat[0],dat[1]]
         when [ 0x42 , 0x4D ]: :STANDARD
         when [ 0x42 , 0x41 ]: :OS2_Bitmap_Array
@@ -23,11 +23,11 @@ module CPL::Tools::IOParser::BMP
     VALID_BIT_DEPTHS = [1,4,8,16,24,32]
     default_endianess :little_endian
 
-    data(:size, :uint) {|size| raise "what.."}#raise "Not the proper DIB_Header" unless size == WV3_SIZE}
+    data(:size, :uint) {|size| raise "Not the proper DIB_Header" unless size == WV3_SIZE; WV3_SIZE}
     data :width, :int
     data :height, :int
-    data :color_plane_number, 2
-    data(:bit_depth, 2) {|depth| raise "Invalid Depth" unless VALID_BIT_DEPTHS.include?(depth)}
+    data :color_plane_count, :uint, :size => 2 # Must be set to 1
+    data(:bit_depth, :uint, :size => 2) {|depth| raise "Invalid Depth: #{depth}" unless VALID_BIT_DEPTHS.include?(depth); depth}
     data :compression_method, :uint do |method|
       case method           # from wikipedia
       when 0:	:BI_RGB       # none	    Most common
@@ -40,19 +40,32 @@ module CPL::Tools::IOParser::BMP
       end
     end
     data :img_size, :uint
-    data :horizontal_resolution, :uint
-    data :veticle_resolution, :uint
+    data :horizontal_resolution, :int
+    data :verticle_resolution, :int
     data :color_palette_size, :uint
     data :important_color_count, :uint
   end
 
   class BMP_Image
-    attr_reader :header,:dib
-    def initialize(file)
+    attr_reader :header,:dib,:raw
+    def initialize(file = nil)
+      load_file(file) unless file.nil?
+    end
+    
+    def load_file(file)
       file = File.open(file)
       @header = BMP_Header.parse(file)
-      @dib = BMP_DIB_WV3.parse(file)
+      
+      @dib = case @header.format
+      when :STANDARD: BMP_DIB_WV3.parse(file)
+      else raise "DIB Not Implemented"
+      end
+      
       @raw = file.read
+    end
+    
+    def self.load_file(file)
+      BMP_Image.new(file)
     end
   end
 end

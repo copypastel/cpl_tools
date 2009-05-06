@@ -6,6 +6,11 @@ class CPL::Tools::IOParser::Base
       value = data_type.parse(ioObj)
       self.instance_variable_set("@#{data_type.prop}",value)
     end
+    self
+  end
+  
+  def self.parse(ioObj)
+    self.new.parse(ioObj)
   end
   
   def self.data prop, type, options = {}, &block
@@ -47,7 +52,7 @@ class CPL::Tools::IOParser::Base
     end
     
     def size
-      temp_size
+      self.options[:size] || temp_size
     end
     
     def convert(value)
@@ -58,16 +63,24 @@ class CPL::Tools::IOParser::Base
     def self.HexstringToFixnum(a)
       s = a.size-1; ret = 0
       a.size.times {|i| ret+= (a[i]<<((s-i)*8))}
-      puts ret
       ret
     end
 
-    def self.IntToTwosCompliment(i)
+    def self.HexstringToTwosCompliment(a)
+      sign = 1
+      first = IntToBinary(a[0])
+      num = HexstringToFixnum(a)
+      if first[0] == 1
+        sign = -1
+        num = 256**(a.size) - num
+      end
+      num*sign
     end
     
     def self.IntToBinary(i)
       #base case
       return [1] if(i == 1)
+      return [0] if(i == 0)
       DataType::IntToBinary(i/2) + [i%2] 
     end
     
@@ -86,17 +99,15 @@ class CPL::Tools::IOParser::Base
       :uint => {                                                                                                                 #
         :size => Proc.new {|data_type| 4},                                                                                       #
         :convert => Proc.new {|data_type,hex_string| 
-          puts hex_string[2]
           DataType::HexstringToFixnum(hex_string) }                                   #
       },                                                                                                                         #
       :int => {                                                                                                                  #
         :size => Proc.new {|data_type| 4},                                                                                       #
-        :convert => Proc.new { |data_type,hex_string| DataType::IntToTwosCompliment(DataType::HexstringToFixnum(hex_string) ) }  #
+        :convert => Proc.new { |data_type,hex_string| DataType::HexstringToTwosCompliment(hex_string) }  #
       },                                                                                                                         #
       :string => {                                                                                                               #
         :size => Proc.new { |data_type|                                                                                          #
-          raise "String size required if using type string." if(data_type.options[:string_size]).nil?                            #
-          data_type.options[:string_size]                                                                                        #
+          raise "Option size required if using type string."                                                                                 #
         },                                                                                                                       #
         :convert => Proc.new { |data_type, hex_string| hex_string}                                                               #
       }                                                                                                                          #
