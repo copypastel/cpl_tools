@@ -1,66 +1,11 @@
 libdir = File.expand_path(File.dirname(__FILE__) + '/../../lib')
 $:.unshift(libdir) unless $:.include? libdir
 
+libdir = File.expand_path(File.dirname(__FILE__))
+$:.unshift(libdir) unless $:.include? libdir
+
 require 'cpl_tools'
-
-module BMP_Helper
-  def self.bmp_file_loc
-    File.expand_path(File.dirname(__FILE__)+"/klingon.bmp")
-  end
-  def self.bmp_file
-    File.open(self.bmp_file_loc)
-  end
-  
-  def self.bmp_data
-    {
-      :header => {
-        :format      => :STANDARD,
-        :file_size   => 0x181E,
-        :data_offset => 0x36
-      },
-      :dib => {
-        :size  => 40,                   #28 00 00 00
-        :width => 40,                   #28 00 00 00
-        :height => -51,                 #CD FF FF FF
-        :color_plane_count => 1,        #01 00
-        :bit_depth => 24,               #18 00
-        :compression_method => :BI_RGB, #00 00 00 00
-        :img_size => 0,                 #00 00 00 00
-        :horizontal_resolution => 5669, #25 16 00 00
-        :verticle_resolution => 5669,   #25 16 00 00
-        :color_palette_size => 0,       #00 00 00 00
-        :important_color_count => 0     #00 00 00 00
-      }
-    }
-  end
-  module SharedSpecs
-    describe "Working BMP_Header Parser", :shared => true do
-      describe "BMP_Header" do
-        it "should parse the #format" do
-          @header.format.should eql(@expected_header[:format])
-        end
-
-        it "should parse the #file_size" do
-          @header.file_size.should eql(@expected_header[:file_size])
-        end
-
-        it "should parse the #data_offset" do
-          @header.data_offset.should eql(@expected_header[:data_offset])
-        end
-      end
-    end
-    
-    describe "Working DIB Parser", :shared => true do
-      [:size,:width,:height,:color_plane_count,:bit_depth,:compression_method,
-       :img_size,:horizontal_resolution,:verticle_resolution,:color_palette_size,
-       :important_color_count].each do |sym|
-         it "should parse the ##{sym}" do
-           @dib.send(sym).should eql(@expected_dib[sym])
-         end
-       end
-    end    
-  end
-end
+require 'io_parser_helper'
 
 describe CPL::Tools::IOParser do
 
@@ -69,10 +14,7 @@ describe CPL::Tools::IOParser do
   #################################
   # Specs for bmp use klingon.bmp #
   describe  CPL::Tools::IOParser::BMP do
-    before(:all) do
-      include BMP_Helper::SharedSpecs
-    end
-        
+    
     describe CPL::Tools::IOParser::BMP::BMP_Header do
       before(:all) do
         @header = CPL::Tools::IOParser::BMP::BMP_Header.new
