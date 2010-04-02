@@ -7,7 +7,26 @@ module CPL::Tools::Alchemy
   
   module CArray
     class Base < CPL::Tools::Alchemy::Base
-      #TODO: Add all of your various conversions
+      attr_reader :data, :array_name
+      def initialize(data,type,options = {})
+        case type
+        when :alchemy_YCbCr:
+          YCbCrToCArrary(data,options)
+        else
+          raise NotImplementedError
+        end
+      end
+      
+      def to_File(options = {})
+        options[:preamble] ||= ""
+        CPL::Tools::Alcehmy::File::Base.new(self,options,:alchemy_YCbCr)
+      end
+      
+      private
+      def YCbCrToCArray(data,options)
+        @data = data.join(',')
+        @array_name = options[:name] || "default_name"
+      end
     end
   end
 end

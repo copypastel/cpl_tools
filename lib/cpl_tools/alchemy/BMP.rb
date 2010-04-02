@@ -15,7 +15,6 @@ module CPL::Tools::Alchemy
     end
     
     class Base < CPL::Tools::Alchemy::Base
-      attr_reader :BMP_Header, :DIB_Header, :IMG_Data
       def initialize(data,format)
         case format
         when :string
@@ -26,10 +25,14 @@ module CPL::Tools::Alchemy
       end
       
       def string_initialize(data)
-        @BMP_Header = BMP_Header.new( data                                  ) 
-        @DIB_Header = DIB_Header.new( data, self.BMP_Header                 )
-        @IMG_Data   = IMG_Data.new(   data, self.BMP_Header,self.DIB_Header )
-        puts self.BMP_Header.data_offset
+        @bmp = BMP_Image.new(data)
+      end
+      
+      def to_YCbCr(options = {})
+        options[:height] ||= @bmp.dib.height
+        options[:width]  ||= @bmp.dib.width
+        options[:alignment] ||= :none
+        CPL::Tools::Alcehmy::YCbCr::Base.new(@bmp,options,:alchemy_bmp)
       end
             
     private
