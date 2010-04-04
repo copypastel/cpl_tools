@@ -1,0 +1,17 @@
+require 'confirmable'
+
+class Person
+  def yell!(string)
+    string.upcase
+  end
+end
+
+Person.new.yell!("quiet whisper") # => "QUIET WHISPER"
+
+class Person
+  include Confirmable
+  confirm :yell!
+end
+
+Person.new.yell!("quiet whisper") # => SecurityError
+Person.new.yell!("quiet whisper") {|c| c.confirm!} # => "QUIET WHISPER"
